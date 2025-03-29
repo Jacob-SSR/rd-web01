@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRoutes, createBrowserRouter } from 'react-router';
+import { useRoutes } from 'react-router';
 import ChallengePage from '../pages/ChallengePage';
 import DailyChallenge from '../pages/DailyChallene'; // Note: File has typo, should be fixed
 import MyChallenge from '../pages/MyChallenge';
@@ -11,29 +11,8 @@ import AdminDashboard from '../pages/admin/AdminDasboard';
 import UserBanlist from '../pages/admin/UsarBanlist';
 import UserDetails from '../pages/admin/UserDetails';
 import { useStore } from '../stores/userStore';
-import App from '../App';
 
-// Create a browser router for the application
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    children: [
-      { index: true, element: <ChallengePage /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
-      { path: "daily-challenge", element: <DailyChallenge /> },
-      { path: "my-challenges", element: <MyChallenge /> },
-      { path: "public-challenges", element: <PublicChallenge /> },
-      { path: "settings", element: <Setting /> },
-      
-      // Admin routes
-      { path: "admin/dashboard", element: <AdminDashboard /> },
-      { path: "admin/users/banlist", element: <UserBanlist /> },
-      { path: "admin/users/:userId", element: <UserDetails /> }
-    ]
-  }
-]);
+// Remove the circular dependency - don't import App here
 
 function AppRoutes() {
   const { isAuthenticated, user } = useStore();
@@ -73,8 +52,5 @@ function AppRoutes() {
   
   return routeElement;
 }
-
-// Export the router for use with RouterProvider
-export { router };
 
 export default AppRoutes;
