@@ -1,23 +1,22 @@
-// src/routes/AppRoutes.jsx
 import React from "react";
-import { Routes, Route, Navigate } from "react-router"; // Fixed imports
+import { Routes, Route, Navigate } from "react-router";
+import Layout from "../layouts/Layout"; // Import Layout ที่ใช้ Outlet
 import ChallengePage from "../pages/ChallengePage";
-import DailyChallenge from "../pages/DailyChallene"; // Note: File has typo, should be fixed
+import DailyChallenge from "../pages/DailyChallene";
 import MyChallenge from "../pages/MyChallenge";
-import PublicChallenge from "../pages/PublicChallenge"; // Note: File has typo, should be fixed
+import PublicChallenge from "../pages/PublicChallenge";
 import Setting from "../pages/Setting";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import AdminDashboard from "../pages/admin/AdminDasboard";
 import UserBanlist from "../pages/admin/UsarBanlist";
 import UserDetails from "../pages/admin/UserDetails";
-import { useStore } from "../stores/userStore";
 import MyProfile from "../pages/MyProfile";
+import { useStore } from "../stores/userStore";
 
 function AppRoutes() {
   const { isAuthenticated, user } = useStore();
 
-  // If not authenticated, only show login/register pages
   if (!isAuthenticated) {
     return (
       <Routes>
@@ -28,25 +27,27 @@ function AppRoutes() {
     );
   }
 
-  // User is authenticated, show full app
   return (
     <Routes>
-      <Route path="/" element={<ChallengePage />} />
-      <Route path="/challenge" element={<ChallengePage />} />
-      <Route path="/daily-challenge" element={<DailyChallenge />} />
-      <Route path="/my-challenges" element={<MyChallenge />} />
-      <Route path="/public-challenges" element={<PublicChallenge />} />
-      <Route path="/profile" element={<MyProfile />} />
-      <Route path="/settings" element={<Setting />} />
+      {/* ใช้ Layout ครอบทุกหน้า */}
+      <Route path="/" element={<Layout />}>
+        <Route index element={<ChallengePage />} />
+        <Route path="challenge" element={<ChallengePage />} />
+        <Route path="daily-challenge" element={<DailyChallenge />} />
+        <Route path="my-challenges" element={<MyChallenge />} />
+        <Route path="public-challenges" element={<PublicChallenge />} />
+        <Route path="profile" element={<MyProfile />} />
+        <Route path="settings" element={<Setting />} />
 
-      {/* Admin routes */}
-      {user?.role === "ADMIN" && (
-        <>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users/banlist" element={<UserBanlist />} />
-          <Route path="/admin/users/:userId" element={<UserDetails />} />
-        </>
-      )}
+        {/* Admin routes */}
+        {user?.role === "ADMIN" && (
+          <>
+            <Route path="admin/dashboard" element={<AdminDashboard />} />
+            <Route path="admin/users/banlist" element={<UserBanlist />} />
+            <Route path="admin/users/:userId" element={<UserDetails />} />
+          </>
+        )}
+      </Route>
 
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/" replace />} />
