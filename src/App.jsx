@@ -1,10 +1,11 @@
+// src/App.jsx
 import React, { useEffect } from "react";
 import AppRoutes from "./routes/AppRoutes";
 import { useStore } from "./stores/userStore";
-import Layout from "./layouts/layout"; // Import the new Layout component instead of Navbar
+import Layout from "./layouts/layout";
 
 function App() {
-  const { getCurrentUser } = useStore();
+  const { getCurrentUser, isAuthenticated } = useStore();
   
   useEffect(() => {
     // Try to authenticate user with stored token on app load
@@ -13,7 +14,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-base-100">
-      {/* Use Layout instead of Navbar to render AppRoutes */}
+      {/* Always render Layout, which will contain the sidebar and navigation */}
       <Layout>
         <AppRoutes />
       </Layout>

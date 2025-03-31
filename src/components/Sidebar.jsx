@@ -1,5 +1,6 @@
+// src/components/Sidebar.jsx
 import React from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { useStore } from '../stores/userStore';
 import { 
   Home, 
@@ -11,11 +12,18 @@ import {
   Award, 
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 
 function Sidebar({ collapsed = false, toggleSidebar }) {
   const { user, logout } = useStore();
+  const location = useLocation();
+  
+  // Check if a route is active
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
   
   return (
     <div className={`bg-primary text-primary-content h-screen ${collapsed ? 'w-20' : 'w-64'} transition-all duration-300 flex flex-col`}>
@@ -37,8 +45,8 @@ function Sidebar({ collapsed = false, toggleSidebar }) {
                 alt="Profile" 
               />
             ) : (
-              <div className="bg-primary-content text-primary flex items-center justify-center h-full">
-                {user?.username?.charAt(0).toUpperCase() || '?'}
+              <div className="bg-primary-content text-primary flex items-center justify-center h-full text-xl font-bold">
+                {user?.username?.charAt(0).toUpperCase() || 'A'}
               </div>
             )}
           </div>
@@ -69,41 +77,70 @@ function Sidebar({ collapsed = false, toggleSidebar }) {
       <div className="flex-1 overflow-y-auto py-4">
         <ul className="menu menu-md px-2">
           <li>
-            <Link to="/" className={`${collapsed ? 'justify-center' : ''}`}>
+            <Link 
+              to="/" 
+              className={`${collapsed ? 'justify-center' : ''} ${isActive('/') ? 'active bg-primary-focus' : ''}`}
+            >
               <Home size={20} />
               {!collapsed && <span>Home</span>}
             </Link>
           </li>
           <li>
-            <Link to="/challenge" className={`${collapsed ? 'justify-center' : ''}`}>
+            <Link 
+              to="/challenge" 
+              className={`${collapsed ? 'justify-center' : ''} ${isActive('/challenge') ? 'active bg-primary-focus' : ''}`}
+            >
               <Trophy size={20} />
               {!collapsed && <span>Challenges</span>}
             </Link>
           </li>
           <li>
-            <Link to="/daily-challenge" className={`${collapsed ? 'justify-center' : ''}`}>
+            <Link 
+              to="/daily-challenge" 
+              className={`${collapsed ? 'justify-center' : ''} ${isActive('/daily-challenge') ? 'active bg-primary-focus' : ''}`}
+            >
               <Calendar size={20} />
               {!collapsed && <span>Daily Challenge</span>}
             </Link>
           </li>
           <li>
-            <Link to="/my-challenges" className={`${collapsed ? 'justify-center' : ''}`}>
+            <Link 
+              to="/my-challenges" 
+              className={`${collapsed ? 'justify-center' : ''} ${isActive('/my-challenges') ? 'active bg-primary-focus' : ''}`}
+            >
               <Users size={20} />
               {!collapsed && <span>My Challenges</span>}
             </Link>
           </li>
           <li>
-            <Link to="/profile" className={`${collapsed ? 'justify-center' : ''}`}>
+            <Link 
+              to="/profile" 
+              className={`${collapsed ? 'justify-center' : ''} ${isActive('/profile') ? 'active bg-primary-focus' : ''}`}
+            >
               <User size={20} />
               {!collapsed && <span>Profile</span>}
             </Link>
           </li>
           <li>
-            <Link to="/settings" className={`${collapsed ? 'justify-center' : ''}`}>
+            <Link 
+              to="/settings" 
+              className={`${collapsed ? 'justify-center' : ''} ${isActive('/settings') ? 'active bg-primary-focus' : ''}`}
+            >
               <Settings size={20} />
               {!collapsed && <span>Settings</span>}
             </Link>
           </li>
+          {user?.role === 'admin' && (
+            <li>
+              <Link 
+                to="/admin/dashboard" 
+                className={`${collapsed ? 'justify-center' : ''} ${isActive('/admin/dashboard') ? 'active bg-primary-focus' : ''}`}
+              >
+                <Shield size={20} />
+                {!collapsed && <span>Admin</span>}
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
       

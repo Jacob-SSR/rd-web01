@@ -1,56 +1,57 @@
-import React from 'react';
-import { useRoutes } from 'react-router';
-import ChallengePage from '../pages/ChallengePage';
-import DailyChallenge from '../pages/DailyChallene'; // Note: File has typo, should be fixed
-import MyChallenge from '../pages/MyChallenge';
-import PublicChallenge from '../pages/PubilcChallenge'; // Note: File has typo, should be fixed
-import Setting from '../pages/Setting';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import AdminDashboard from '../pages/admin/AdminDasboard';
-import UserBanlist from '../pages/admin/UsarBanlist';
-import UserDetails from '../pages/admin/UserDetails';
-import { useStore } from '../stores/userStore';
-
-// Remove the circular dependency - don't import App here
+// src/routes/AppRoutes.jsx
+import React from "react";
+import { Routes, Route, Navigate } from "react-router"; // Fixed imports
+import ChallengePage from "../pages/ChallengePage";
+import DailyChallenge from "../pages/DailyChallene"; // Note: File has typo, should be fixed
+import MyChallenge from "../pages/MyChallenge";
+import PublicChallenge from "../pages/PublicChallenge"; // Note: File has typo, should be fixed
+import Setting from "../pages/Setting";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import AdminDashboard from "../pages/admin/AdminDasboard";
+import UserBanlist from "../pages/admin/UsarBanlist";
+import UserDetails from "../pages/admin/UserDetails";
+import { useStore } from "../stores/userStore";
+import MyProfile from "../pages/MyProfile";
 
 function AppRoutes() {
   const { isAuthenticated, user } = useStore();
-  
-  // Define routes based on authentication state
-  const routes = [
-    // Public routes
-    { path: "/login", element: <Login /> },
-    { path: "/register", element: <Register /> },
-  ];
-  
-  // Add protected routes if user is authenticated
-  if (isAuthenticated) {
-    routes.push(
-      { path: "/", element: <ChallengePage /> },
-      { path: "/daily-challenge", element: <DailyChallenge /> },
-      { path: "/my-challenges", element: <MyChallenge /> },
-      { path: "/public-challenges", element: <PublicChallenge /> },
-      { path: "/settings", element: <Setting /> }
+
+  // If not authenticated, only show login/register pages
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     );
-    
-    // Add admin routes if user has admin role
-    if (user?.role === 'admin') {
-      routes.push(
-        { path: "/admin/dashboard", element: <AdminDashboard /> },
-        { path: "/admin/users/banlist", element: <UserBanlist /> },
-        { path: "/admin/users/:userId", element: <UserDetails /> }
-      );
-    }
-  } else {
-    // Redirect all other routes to login if not authenticated
-    routes.push({ path: "*", element: <Login /> });
   }
-  
-  // Use the routes configuration with useRoutes hook
-  const routeElement = useRoutes(routes);
-  
-  return routeElement;
+
+  // User is authenticated, show full app
+  return (
+    <Routes>
+      <Route path="/" element={<ChallengePage />} />
+      <Route path="/challenge" element={<ChallengePage />} />
+      <Route path="/daily-challenge" element={<DailyChallenge />} />
+      <Route path="/my-challenges" element={<MyChallenge />} />
+      <Route path="/public-challenges" element={<PublicChallenge />} />
+      <Route path="/profile" element={<MyProfile />} />
+      <Route path="/settings" element={<Setting />} />
+
+      {/* Admin routes */}
+      {user?.role === "ADMIN" && (
+        <>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users/banlist" element={<UserBanlist />} />
+          <Route path="/admin/users/:userId" element={<UserDetails />} />
+        </>
+      )}
+
+      {/* Fallback route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 export default AppRoutes;

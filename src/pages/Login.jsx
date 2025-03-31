@@ -1,3 +1,5 @@
+// src/pages/Login.jsx
+// Add a timeout limit to the login process
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
@@ -13,6 +15,7 @@ function Login() {
   });
   const [formErrors, setFormErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [loginTimeout, setLoginTimeout] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -20,6 +23,23 @@ function Login() {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
+
+  // Add a timeout handler for long-running login attempts
+  useEffect(() => {
+    let timeoutId;
+    
+    if (isLoading) {
+      timeoutId = setTimeout(() => {
+        setLoginTimeout(true);
+      }, 5000); // Show timeout message after 5 seconds
+    } else {
+      setLoginTimeout(false);
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isLoading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +83,12 @@ function Login() {
     if (!validate()) return;
     
     try {
-      await login(formData.identity, formData.password);
+      // Use AbortController to set a timeout on the login request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
+      
+      await login(formData.identity, formData.password, controller.signal);
+      clearTimeout(timeoutId);
       // Navigation will happen in the useEffect when isAuthenticated changes
     } catch (err) {
       // Error is handled by the store and shown via the error state
@@ -84,6 +109,12 @@ function Login() {
             {error && (
               <div className="alert alert-error mb-4">
                 <span>{error}</span>
+              </div>
+            )}
+            
+            {loginTimeout && (
+              <div className="alert alert-warning mb-4">
+                <span>Login is taking longer than expected. Server might be slow. Please wait...</span>
               </div>
             )}
             
