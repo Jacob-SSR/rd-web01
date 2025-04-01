@@ -1,7 +1,6 @@
 // src/pages/Login.jsx
-// Add a timeout limit to the login process
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { useNavigate, Link } from 'react-router-dom'; // Fixed import
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useStore } from '../stores/userStore';
 
@@ -183,24 +182,29 @@ function Login() {
               <div className="form-control mt-6">
                 <button 
                   type="submit" 
-                  className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+                  className="btn btn-primary"
                   disabled={isLoading}
                 >
-                  {isLoading ? 
-                    <span className="loading loading-spinner loading-sm"></span> : 
-                    <LogIn size={18} className="mr-2" />
-                  }
-                  {isLoading ? 'Logging in...' : 'Login'}
+                  {isLoading ? (
+                    <span className="loading loading-spinner loading-sm"></span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <LogIn size={20} />
+                      Login
+                    </span>
+                  )}
                 </button>
               </div>
-              
-              <div className="text-center mt-4">
-                <span>Don't have an account? </span>
-                <Link to="/register" className="link link-primary">
-                  Register
-                </Link>
-              </div>
             </form>
+            
+            <div className="divider">OR</div>
+            
+            <div className="text-center">
+              <p>Don't have an account?</p>
+              <Link to="/register" className="btn btn-link">
+                Register now
+              </Link>
+            </div>
           </div>
         </div>
       </div>

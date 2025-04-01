@@ -1,6 +1,6 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router";
-import Layout from "../layouts/Layout"; // Import Layout ที่ใช้ Outlet
+import { Routes, Route, Navigate } from "react-router-dom";
+import Layout from "../layouts/layout";
 import ChallengePage from "../pages/ChallengePage";
 import DailyChallenge from "../pages/DailyChallene";
 import MyChallenge from "../pages/MyChallenge";
@@ -29,14 +29,14 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* ใช้ Layout ครอบทุกหน้า */}
+      {/* Use Layout with Outlet */}
       <Route path="/" element={<Layout />}>
-        <Route index element={<ChallengePage />} />
+        <Route index element={<Navigate to="/profile" replace />} />
+        <Route path="profile" element={<MyProfile />} />
         <Route path="challenge" element={<ChallengePage />} />
         <Route path="daily-challenge" element={<DailyChallenge />} />
         <Route path="my-challenges" element={<MyChallenge />} />
         <Route path="public-challenges" element={<PublicChallenge />} />
-        <Route path="profile" element={<MyProfile />} />
         <Route path="settings" element={<Setting />} />
 
         {/* Admin routes */}
@@ -50,7 +50,7 @@ function AppRoutes() {
       </Route>
 
       {/* Fallback route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/profile" replace />} />
     </Routes>
   );
 }

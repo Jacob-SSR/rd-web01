@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router";
-import { Camera, Award, Clock, Calendar, Medal } from "lucide-react";
+import { Link } from "react-router-dom"; // Fixed import
+import {
+  Camera,
+  Award,
+  Clock,
+  Calendar,
+  Medal,
+  AlertTriangle,
+} from "lucide-react";
 import useStore from "../stores/userStore";
 import {
   getUserProfile,
@@ -26,9 +33,9 @@ function MyProfile() {
           getUserChallengeHistory(),
         ]);
 
-        setProfile(profileData);
-        setBadges(badgesData);
-        setChallengeHistory(historyData);
+        setProfile(profileData || {});
+        setBadges(Array.isArray(badgesData) ? badgesData : []);
+        setChallengeHistory(Array.isArray(historyData) ? historyData : []);
       } catch (err) {
         setError("Failed to load profile data");
         console.error(err);
@@ -42,15 +49,20 @@ function MyProfile() {
 
   // Calculate current streak
   const calculateStreak = () => {
-    if (!challengeHistory || challengeHistory.length === 0) return 0;
+    if (!Array.isArray(challengeHistory) || challengeHistory.length === 0)
+      return 0;
 
     // This is a simplified streak calculation - in a real app, you'd need more sophisticated logic
-    return 1; // For demo purposes
+    const completedChallenges = challengeHistory.filter(
+      (challenge) => challenge.status === "completed"
+    );
+    return completedChallenges.length;
   };
 
   // Get the last completed challenge
   const getLastChallenge = () => {
-    if (!challengeHistory || challengeHistory.length === 0) return null;
+    if (!Array.isArray(challengeHistory) || challengeHistory.length === 0)
+      return null;
 
     const completed = challengeHistory.filter(
       (ch) => ch.status === "completed"
@@ -65,7 +77,7 @@ function MyProfile() {
 
   // Get most recent achievement/badge
   const getRecentAchievement = () => {
-    if (!badges || badges.length === 0) return null;
+    if (!Array.isArray(badges) || badges.length === 0) return null;
 
     // Return the most recently earned badge
     return badges.sort(
@@ -80,6 +92,15 @@ function MyProfile() {
     return (
       <div className="flex justify-center items-center h-screen">
         <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-error shadow-lg">
+        <AlertTriangle size={20} />
+        <span>{error}</span>
       </div>
     );
   }
@@ -101,9 +122,12 @@ function MyProfile() {
               </div>
             )}
           </div>
-          <button className="btn btn-circle btn-xs btn-accent absolute bottom-0 right-0">
+          <Link
+            to="/settings"
+            className="btn btn-circle btn-xs btn-accent absolute bottom-0 right-0"
+          >
             <Camera size={16} />
-          </button>
+          </Link>
         </div>
 
         {/* Username */}
@@ -182,7 +206,7 @@ function MyProfile() {
             Are you ready for today's challenge?
           </h1>
 
-          <Link to="/daily-challenge">
+          <Link to="/challenge">
             <button className="btn btn-accent">Start Challenge</button>
           </Link>
         </div>

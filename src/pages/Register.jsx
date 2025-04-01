@@ -1,39 +1,46 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router";
+// src/pages/Register.jsx
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom"; // Fixed import
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useStore } from "../stores/userStore";
 
 function Register() {
   const navigate = useNavigate();
-  const { register, isLoading, error, clearError } = useStore();
-
+  const { register, isAuthenticated, isLoading, error, clearError } = useStore();
+  
   const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    firstname: "",
-    lastname: "",
-    password: "",
-    confirmPassword: "",
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
   });
-
-  const [errors, setErrors] = useState({});
+  
+  const [formErrors, setFormErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
-
+    
     // Clear field-specific error when user types
-    if (errors[name]) {
-      setErrors((prev) => ({
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
         ...prev,
-        [name]: "",
+        [name]: ''
       }));
     }
-
+    
     // Clear global error when user types
     if (error) {
       clearError();
@@ -41,60 +48,46 @@ function Register() {
   };
 
   const validate = () => {
-    const newErrors = {};
-
-    // Username validation
+    const errors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
     if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
+      errors.username = 'Username is required';
     } else if (formData.username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username =
-        "Username can only contain letters, numbers, and underscores";
+      errors.username = 'Username must be at least 3 characters';
     }
-
-    // Email validation
+    
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      errors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
     }
-
-    // Password validation
+    
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      errors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      errors.password = 'Password must be at least 6 characters';
     }
-
-    // Confirm password validation
+    
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      errors.confirmPassword = 'Passwords do not match';
     }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!validate()) return;
-
+    
     try {
-      await register({
-        username: formData.username,
-        email: formData.email,
-        firstname: formData.firstname,
-        lastname: formData.lastname,
-        password: formData.password,
-      });
-
-      // Redirect to home page after successful registration
-      navigate("/");
+      await register(formData.username, formData.email, formData.password);
+      // Navigation will happen in the useEffect when isAuthenticated changes
     } catch (err) {
-      // Error is handled by the store
-      console.error("Registration failed:", err);
+      // Error is handled by the store and shown via the error state
+      console.error('Registration failed:', err);
     }
   };
 
@@ -102,12 +95,10 @@ function Register() {
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content flex-col w-full max-w-md">
         <div className="text-center">
-          <h1 className="text-4xl font-bold">Create Account</h1>
-          <p className="py-4">
-            Join our community and start tracking your challenges
-          </p>
+          <h1 className="text-4xl font-bold">Register</h1>
+          <p className="py-4">Create a new account to start challenging yourself</p>
         </div>
-
+        
         <div className="card w-full bg-base-100 shadow-xl">
           <div className="card-body">
             {error && (
@@ -115,104 +106,60 @@ function Register() {
                 <span>{error}</span>
               </div>
             )}
-
+            
             <form onSubmit={handleSubmit}>
-              {/* Username field */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Username *</span>
+                  <span className="label-text">Username</span>
                 </label>
                 <input
                   type="text"
                   name="username"
-                  className={`input input-bordered ${
-                    errors.username ? "input-error" : ""
-                  }`}
                   placeholder="Choose a username"
+                  className={`input input-bordered ${formErrors.username ? 'input-error' : ''}`}
                   value={formData.username}
                   onChange={handleChange}
                 />
-                {errors.username && (
+                {formErrors.username && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {errors.username}
-                    </span>
+                    <span className="label-text-alt text-error">{formErrors.username}</span>
                   </label>
                 )}
               </div>
-
-              {/* Email field */}
+              
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Email Address *</span>
+                  <span className="label-text">Email</span>
                 </label>
                 <input
                   type="email"
                   name="email"
-                  className={`input input-bordered ${
-                    errors.email ? "input-error" : ""
-                  }`}
                   placeholder="Enter your email"
+                  className={`input input-bordered ${formErrors.email ? 'input-error' : ''}`}
                   value={formData.email}
                   onChange={handleChange}
                 />
-                {errors.email && (
+                {formErrors.email && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {errors.email}
-                    </span>
+                    <span className="label-text-alt text-error">{formErrors.email}</span>
                   </label>
                 )}
               </div>
-
-              {/* Name fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">First Name</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstname"
-                    className="input input-bordered"
-                    placeholder="First name"
-                    value={formData.firstname}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Last Name</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="lastname"
-                    className="input input-bordered"
-                    placeholder="Last name"
-                    value={formData.lastname}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              {/* Password field */}
+              
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Password *</span>
+                  <span className="label-text">Password</span>
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
-                    className={`input input-bordered w-full ${
-                      errors.password ? "input-error" : ""
-                    }`}
                     placeholder="Create a password"
+                    className={`input input-bordered w-full ${formErrors.password ? 'input-error' : ''}`}
                     value={formData.password}
                     onChange={handleChange}
                   />
-                  <button
+                  <button 
                     type="button"
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                     onClick={() => setShowPassword(!showPassword)}
@@ -224,62 +171,80 @@ function Register() {
                     )}
                   </button>
                 </div>
-                {errors.password && (
+                {formErrors.password && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {errors.password}
-                    </span>
+                    <span className="label-text-alt text-error">{formErrors.password}</span>
                   </label>
                 )}
               </div>
-
-              {/* Confirm Password field */}
+              
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">Confirm Password *</span>
+                  <span className="label-text">Confirm Password</span>
                 </label>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  className={`input input-bordered ${
-                    errors.confirmPassword ? "input-error" : ""
-                  }`}
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                />
-                {errors.confirmPassword && (
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    className={`input input-bordered w-full ${formErrors.confirmPassword ? 'input-error' : ''}`}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                  />
+                  <button 
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} className="text-gray-500" />
+                    ) : (
+                      <Eye size={20} className="text-gray-500" />
+                    )}
+                  </button>
+                </div>
+                {formErrors.confirmPassword && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
-                      {errors.confirmPassword}
-                    </span>
+                    <span className="label-text-alt text-error">{formErrors.confirmPassword}</span>
                   </label>
                 )}
               </div>
-
-              {/* Submit Button */}
+              
+              <div className="form-control mt-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <input type="checkbox" className="checkbox checkbox-primary" id="terms" />
+                  <label htmlFor="terms" className="cursor-pointer text-sm">
+                    I agree to the <a href="#" className="link link-primary">Terms of Service</a> and <a href="#" className="link link-primary">Privacy Policy</a>
+                  </label>
+                </div>
+              </div>
+              
               <div className="form-control mt-6">
-                <button
-                  type="submit"
-                  className={`btn btn-primary ${isLoading ? "loading" : ""}`}
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <span className="loading loading-spinner loading-sm"></span>
                   ) : (
-                    <UserPlus size={18} className="mr-2" />
+                    <span className="flex items-center gap-2">
+                      <UserPlus size={20} />
+                      Register
+                    </span>
                   )}
-                  {isLoading ? "Creating Account..." : "Create Account"}
                 </button>
               </div>
-
-              <div className="text-center mt-4">
-                <span>Already have an account? </span>
-                <Link to="/login" className="link link-primary">
-                  Login
-                </Link>
-              </div>
             </form>
+            
+            <div className="divider">OR</div>
+            
+            <div className="text-center">
+              <p>Already have an account?</p>
+              <Link to="/login" className="btn btn-link">
+                Login now
+              </Link>
+            </div>
           </div>
         </div>
       </div>

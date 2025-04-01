@@ -1,7 +1,8 @@
+// src/layouts/layout.jsx
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { Menu, Home, Bell, LogOut, User, Settings } from "lucide-react";
-import { Link, Outlet } from "react-router";
+import { Link, Outlet } from "react-router-dom"; // Fixed import
 import { useStore } from "../stores/userStore";
 
 function Layout() {

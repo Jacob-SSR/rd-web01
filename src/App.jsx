@@ -2,10 +2,9 @@
 import React, { useEffect } from "react";
 import AppRoutes from "./routes/AppRoutes";
 import { useStore } from "./stores/userStore";
-import Layout from "./layouts/layout";
 
 function App() {
-  const { getCurrentUser, isAuthenticated } = useStore();
+  const { getCurrentUser } = useStore();
   
   useEffect(() => {
     // Try to authenticate user with stored token on app load
@@ -14,10 +13,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-base-100">
-      {/* Always render Layout, which will contain the sidebar and navigation */}
-      <Layout>
-        <AppRoutes />
-      </Layout>
+      <AppRoutes />
     </div>
   );
 }

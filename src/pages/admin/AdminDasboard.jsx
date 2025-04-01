@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import {
   Users,
   Shield,
@@ -9,6 +9,7 @@ import {
   BarChart2,
   User,
   AlertTriangle,
+  Trophy, // Added missing Trophy import
 } from "lucide-react";
 import {
   getAllUsers,
@@ -167,74 +168,32 @@ function AdminDashboard() {
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table table-zebra w-full">
-              <thead>
-                <tr>
-                  <th>ชื่อผู้ใช้</th>
-                  <th>อีเมล</th>
-                  <th>บทบาท</th>
-                  <th>วันที่ลงทะเบียน</th>
-                  <th>สถานะ</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td className="flex items-center gap-2">
-                      <div className="avatar">
-                        <div className="w-8 rounded-full">
-                          {user.profileImage ? (
-                            <img src={user.profileImage} alt={user.username} />
-                          ) : (
-                            <div className="bg-primary text-primary-content flex items-center justify-center h-full">
-                              {user.username.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {user.username}
-                    </td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          user.role === "ADMIN"
-                            ? "badge-primary"
-                            : "badge-ghost"
-                        }`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      {user.isBanned ? (
-                        <span className="badge badge-error">แบน</span>
-                      ) : (
-                        <span className="badge badge-success">ปกติ</span>
-                      )}
-                    </td>
-                    <td>
-                      <Link
-                        to={`/admin/users/${user.id}`}
-                        className="btn btn-xs btn-outline"
-                      >
-                        รายละเอียด
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-                {recentUsers.length === 0 && (
-                  <tr>
-                    <td colSpan="6" className="text-center py-4">
-                      ไม่พบข้อมูลผู้ใช้
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          {/* Recent Users List */}
+          <div className="divide-y">
+            {recentUsers.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between p-4 hover:bg-base-200 transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="avatar">
+                    <div className="w-10 rounded-full">
+                      <img
+                        src={user.profilePicture || "/default-avatar.png"}
+                        alt={user.username}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-bold">{user.username}</div>
+                    <div className="text-sm opacity-50">{user.email}</div>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -243,27 +202,3 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
-
-function Trophy(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  );
-}
