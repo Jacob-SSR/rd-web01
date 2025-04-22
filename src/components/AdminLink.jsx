@@ -1,6 +1,5 @@
-// src/components/AdminLink.jsx
 import React from 'react';
-import { Link } from 'react-router-dom'; // Fixed import
+import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { useStore } from '../stores/userStore';
 

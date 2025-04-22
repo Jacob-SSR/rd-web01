@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../stores/userStore';
 import { 
@@ -13,16 +13,24 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Shield 
+  Shield,
+  Plus,
+  List
 } from 'lucide-react';
 
 function Sidebar() {
   const { user, logout } = useStore();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   // Check if a route is active
@@ -172,8 +180,28 @@ function Sidebar() {
                       className={isActive('/my-challenges') ? 'active bg-primary-focus' : ''}
                       onClick={toggleSidebar}
                     >
-                      <Users size={20} />
+                      <List size={20} />
                       <span>My Challenges</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/public-challenges" 
+                      className={isActive('/public-challenges') ? 'active bg-primary-focus' : ''}
+                      onClick={toggleSidebar}
+                    >
+                      <Users size={20} />
+                      <span>Public Challenges</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/create-challenge" 
+                      className={isActive('/create-challenge') ? 'active bg-primary-focus' : ''}
+                      onClick={toggleSidebar}
+                    >
+                      <Plus size={20} />
+                      <span>Create Challenge</span>
                     </Link>
                   </li>
                   <li>
@@ -234,7 +262,7 @@ function Sidebar() {
               {/* Logout */}
               <div className="p-4 border-t border-primary-focus">
                 <button 
-                  onClick={logout} 
+                  onClick={handleLogout} 
                   className="btn btn-block btn-outline text-primary-content hover:bg-primary-focus hover:text-primary-content"
                 >
                   <LogOut size={20} />
