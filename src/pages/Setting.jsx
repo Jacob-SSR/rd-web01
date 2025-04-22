@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Fixed import
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Key,
@@ -10,7 +10,7 @@ import {
   Check,
   X,
 } from "lucide-react";
-import useStore from "../stores/userStore";
+import { useStore } from "../stores/userStore"; // Changed to use { useStore } instead of default import
 import {
   updateUserProfile,
   updateUserPassword,
@@ -19,8 +19,7 @@ import {
 
 function Setting() {
   const navigate = useNavigate();
-  const { user, updateProfile, updatePassword, deleteAccount, logout } =
-    useStore();
+  const { user, logout } = useStore(); // Remove functions that don't exist in your store
 
   const [activeTab, setActiveTab] = useState("profile");
   const [loading, setLoading] = useState(false);
@@ -87,14 +86,25 @@ function Setting() {
     }));
   };
 
-  // Submit profile form
+  // Submit profile form - Updated to use the API directly
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
-      await updateProfile(profileForm, profileImage);
+      // Create FormData for the API call
+      const formData = new FormData();
+      formData.append('firstname', profileForm.firstname);
+      formData.append('lastname', profileForm.lastname);
+      
+      if (profileImage) {
+        formData.append('profileImage', profileImage);
+      }
+      
+      // Use the imported API function directly
+      const response = await updateUserProfile(formData);
+      
       setMessage({
         type: "success",
         text: "Profile updated successfully!",
@@ -109,7 +119,7 @@ function Setting() {
     }
   };
 
-  // Submit password form
+  // Submit password form - Updated to use the API directly
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
@@ -126,11 +136,12 @@ function Setting() {
     setMessage({ type: "", text: "" });
 
     try {
-      await updatePassword(
-        passwordForm.oldPassword,
-        passwordForm.newPassword,
-        passwordForm.confirmPassword
-      );
+      // Use the imported API function directly
+      await updateUserPassword({
+        oldPassword: passwordForm.oldPassword,
+        newPassword: passwordForm.newPassword,
+        confirmPassword: passwordForm.confirmPassword
+      });
 
       setMessage({
         type: "success",
@@ -153,13 +164,13 @@ function Setting() {
     }
   };
 
-  // Handle account deletion
+  // Handle account deletion - Updated to use the API directly
   const handleDeleteAccount = async () => {
     setLoading(true);
 
     try {
-      await deleteAccount();
-      logout();
+      await deleteUserAccount();
+      logout(); // This function should still be available in your store
       navigate("/login");
     } catch (error) {
       setMessage({
@@ -176,7 +187,7 @@ function Setting() {
 
       {/* Tabs */}
       <div className="tabs tabs-boxed mb-6">
-        <a
+        <button
           className={`tab ${activeTab === "profile" ? "tab-active" : ""}`}
           onClick={() => {
             setActiveTab("profile");
@@ -185,9 +196,9 @@ function Setting() {
         >
           <User size={18} className="mr-2" />
           Profile
-        </a>
+        </button>
 
-        <a
+        <button
           className={`tab ${activeTab === "password" ? "tab-active" : ""}`}
           onClick={() => {
             setActiveTab("password");
@@ -196,9 +207,9 @@ function Setting() {
         >
           <Key size={18} className="mr-2" />
           Password
-        </a>
+        </button>
 
-        <a
+        <button
           className={`tab ${activeTab === "account" ? "tab-active" : ""}`}
           onClick={() => {
             setActiveTab("account");
@@ -207,7 +218,7 @@ function Setting() {
         >
           <Trash2 size={18} className="mr-2" />
           Account
-        </a>
+        </button>
       </div>
 
       {/* Alert Messages */}
@@ -302,12 +313,7 @@ function Setting() {
                   className={`btn btn-primary ${loading ? "loading" : ""}`}
                   disabled={loading}
                 >
-                  {loading ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : (
-                    <Save size={18} className="mr-2" />
-                  )}
-                  Save Changes
+                  Save
                 </button>
               </div>
             </form>
@@ -322,13 +328,12 @@ function Setting() {
             <h2 className="card-title">Change Password</h2>
 
             <form onSubmit={handlePasswordSubmit}>
-              <div className="form-control">
+              <div className="form-control mb-4">
                 <label className="label">
-                  <span className="label-text">Current Password</span>
+                  <span className="label-text">Old Password</span>
                 </label>
                 <input
                   type="password"
-                  id="oldPassword"
                   name="oldPassword"
                   value={passwordForm.oldPassword}
                   onChange={handlePasswordChange}
@@ -337,50 +342,41 @@ function Setting() {
                 />
               </div>
 
-              <div className="form-control">
+              <div className="form-control mb-4">
                 <label className="label">
                   <span className="label-text">New Password</span>
                 </label>
                 <input
                   type="password"
-                  id="newPassword"
                   name="newPassword"
                   value={passwordForm.newPassword}
                   onChange={handlePasswordChange}
                   className="input input-bordered"
                   required
-                  minLength="6"
                 />
               </div>
 
-              <div className="form-control">
+              <div className="form-control mb-4">
                 <label className="label">
                   <span className="label-text">Confirm New Password</span>
                 </label>
                 <input
                   type="password"
-                  id="confirmPassword"
                   name="confirmPassword"
                   value={passwordForm.confirmPassword}
                   onChange={handlePasswordChange}
                   className="input input-bordered"
                   required
-                  minLength="6"
                 />
               </div>
 
-              <div className="card-actions justify-end mt-6">
+              <div className="card-actions justify-end">
                 <button
                   type="submit"
                   className={`btn btn-primary ${loading ? "loading" : ""}`}
                   disabled={loading}
                 >
-                  {loading ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : (
-                    <Key size={18} className="mr-2" />
-                  )}
-                  Update Password
+                  Save
                 </button>
               </div>
             </form>
@@ -388,56 +384,49 @@ function Setting() {
         </div>
       )}
 
-      {/* Account Settings */}
+      {/* Account Deletion */}
       {activeTab === "account" && (
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
-            <h2 className="card-title text-error">Delete Account</h2>
+            <h2 className="card-title">Delete Account</h2>
 
-            <div className="alert alert-warning mb-6">
-              <AlertTriangle size={18} className="stroke-current shrink-0" />
-              <span>
-                Warning: This action is irreversible. All your data will be
-                permanently deleted.
-              </span>
+            <p className="mb-4 text-red-500">
+              This action is irreversible. Are you sure you want to delete your
+              account?
+            </p>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="btn btn-error"
+              >
+                Delete Account
+              </button>
             </div>
 
-            {!showDeleteConfirm ? (
-              <div className="card-actions justify-end">
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="btn btn-error"
-                >
-                  <Trash2 size={18} className="mr-2" />
-                  Delete My Account
-                </button>
-              </div>
-            ) : (
-              <div className="card bg-base-200 p-4 rounded-lg">
-                <h3 className="font-bold text-error mb-4">
-                  Are you absolutely sure you want to delete your account?
-                </h3>
-
-                <div className="card-actions justify-end">
-                  <button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="btn btn-ghost"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    onClick={handleDeleteAccount}
-                    className={`btn btn-error ${loading ? "loading" : ""}`}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <span className="loading loading-spinner loading-sm"></span>
-                    ) : (
-                      <Trash2 size={18} className="mr-2" />
-                    )}
-                    Yes, Delete My Account
-                  </button>
+            {/* Confirmation Modal */}
+            {showDeleteConfirm && (
+              <div className="modal modal-open">
+                <div className="modal-box">
+                  <h2 className="text-xl font-semibold">Confirm Deletion</h2>
+                  <p className="mb-4 text-red-500">
+                    Are you sure you want to delete your account? This action
+                    cannot be undone.
+                  </p>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="btn btn-secondary mr-2"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteAccount}
+                      className="btn btn-error"
+                    >
+                      Yes, Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

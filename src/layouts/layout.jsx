@@ -22,11 +22,12 @@ function Layout() {
       {mobileSidebarOpen && (
         <div className="block md:hidden fixed inset-0 z-50">
           <div
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute inset-0 bg-opacity-50"
             onClick={toggleMobileSidebar}
           ></div>
-          <div className="relative h-full w-64">
-            <Sidebar collapsed={false} toggleSidebar={toggleMobileSidebar} />
+          <div className="relative h-full w-64 bg-primary text-primary-content">
+            {/* Don't pass the toggle function to avoid conflicts */}
+            <Sidebar collapsed={false} isMobile={true} />
           </div>
         </div>
       )}
@@ -37,7 +38,7 @@ function Layout() {
             <div className="flex items-center gap-2">
               <button
                 className="md:hidden btn btn-ghost btn-circle"
-                onClick={toggleMobileSidebar}
+                onClick={() => setMobileSidebarOpen(true)} // Directly set to true instead of toggling
                 aria-label="Toggle mobile sidebar"
               >
                 <Menu size={24} />
@@ -53,7 +54,10 @@ function Layout() {
             <div className="flex items-center gap-3">
               {isAuthenticated ? (
                 <>
-                  <button className="btn btn-ghost btn-circle" aria-label="Notifications">
+                  <button
+                    className="btn btn-ghost btn-circle"
+                    aria-label="Notifications"
+                  >
                     <div className="indicator">
                       <Bell size={20} />
                     </div>
@@ -80,7 +84,7 @@ function Layout() {
                     </div>
                     <ul
                       tabIndex={0}
-                      className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52 text-neutral"
+                      className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-blue-500 rounded-box w-52 text-neutral"
                     >
                       <li>
                         <Link to="/profile" className="justify-between">
@@ -99,7 +103,14 @@ function Layout() {
                         </Link>
                       </li>
                       <li>
-                        <Link to="#" onClick={(e) => { e.preventDefault(); logout(); }} className="flex items-center gap-2">
+                        <Link
+                          to="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            logout();
+                          }}
+                          className="flex items-center gap-2"
+                        >
                           <LogOut size={16} />
                           Logout
                         </Link>
