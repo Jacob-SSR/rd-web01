@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Fixed import
+import { Link } from 'react-router-dom';
 import { getAllChallenges, joinChallenge } from '../api/exportAllApi';
 
 function DailyChallenge() {
@@ -11,10 +11,29 @@ function DailyChallenge() {
   useEffect(() => {
     async function fetchDailyChallenge() {
       try {
-        const challenges = await getAllChallenges();
-        // Assuming the API returns all challenges and we need to filter for daily ones
-        const dailyOnes = challenges.filter(challenge => challenge.type === 'daily');
-        // Take the most recent daily challenge
+        const response = await getAllChallenges();
+        
+        // ตรวจสอบรูปแบบข้อมูลที่ได้รับจาก API
+        // API อาจจะส่งคืน { challenges: [...] } แทนที่จะเป็น array โดยตรง
+        const challenges = response.challenges || response || [];
+        
+        // ตรวจสอบว่า challenges เป็น array ก่อนใช้ filter
+        if (!Array.isArray(challenges)) {
+          console.error('Expected challenges to be an array but got:', challenges);
+          setDailyChallenge(null);
+          setLoading(false);
+          return;
+        }
+
+        // กรองหา daily challenges
+        // หมายเหตุ: ดูเหมือนว่าในโค้ดของคุณอาจจะไม่ได้กำหนด type 'daily' ไว้
+        // อาจจะต้องกรองด้วยวิธีอื่น เช่น ดูจากชื่อหรือคุณสมบัติอื่นๆ
+        const dailyOnes = challenges.filter(challenge => 
+          challenge.type === 'daily' || 
+          (challenge.name && challenge.name.toLowerCase().includes('daily'))
+        );
+        
+        // เลือกความท้าทายล่าสุด
         const mostRecent = dailyOnes.length > 0 ? dailyOnes[0] : null;
         
         setDailyChallenge(mostRecent);
@@ -41,6 +60,7 @@ function DailyChallenge() {
     }
   };
 
+  // ส่วนที่เหลือของโค้ดคงเดิม...
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -72,7 +92,7 @@ function DailyChallenge() {
       
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="p-6">
-          <h2 className="text-xl font-bold mb-2">{dailyChallenge.title}</h2>
+          <h2 className="text-xl font-bold mb-2">{dailyChallenge.name || dailyChallenge.title}</h2>
           
           <div className="flex items-center mb-4">
             <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2">

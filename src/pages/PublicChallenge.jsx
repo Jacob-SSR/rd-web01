@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Fixed import
+import { Link } from 'react-router-dom';
 import { getAllChallenges, getAllCategories } from '../api/exportAllApi';
 
 function PublicChallenge() {
@@ -16,13 +16,29 @@ function PublicChallenge() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [challengesData, categoriesData] = await Promise.all([
+        const [challengesResponse, categoriesResponse] = await Promise.all([
           getAllChallenges(),
           getAllCategories()
         ]);
         
-        setChallenges(challengesData);
-        setCategories(categoriesData);
+        // ตรวจสอบและแปลงข้อมูลให้ถูกต้อง
+        const challengesData = challengesResponse?.challenges || challengesResponse || [];
+        const categoriesData = categoriesResponse?.categories || categoriesResponse || [];
+        
+        // ตรวจสอบว่าข้อมูลเป็น array จริงๆ
+        if (!Array.isArray(challengesData)) {
+          console.error('challenges data is not an array:', challengesData);
+          setChallenges([]);
+        } else {
+          setChallenges(challengesData);
+        }
+        
+        if (!Array.isArray(categoriesData)) {
+          console.error('categories data is not an array:', categoriesData);
+          setCategories([]);
+        } else {
+          setCategories(categoriesData);
+        }
       } catch (err) {
         setError('Failed to load challenges');
         console.error(err);
@@ -42,7 +58,8 @@ function PublicChallenge() {
     }));
   };
 
-  const filteredChallenges = challenges.filter(challenge => {
+  // ตรวจสอบให้แน่ใจว่า challenges เป็น array ก่อนใช้ filter
+  const filteredChallenges = Array.isArray(challenges) ? challenges.filter(challenge => {
     // Filter by category
     if (filters.category && challenge.categoryId !== filters.category) {
       return false;
@@ -54,12 +71,12 @@ function PublicChallenge() {
     }
     
     // Filter by search term
-    if (filters.search && !challenge.title.toLowerCase().includes(filters.search.toLowerCase())) {
+    if (filters.search && !challenge.name?.toLowerCase().includes(filters.search.toLowerCase())) {
       return false;
     }
     
     return true;
-  });
+  }) : [];
 
   if (loading) {
     return (
@@ -150,7 +167,7 @@ function PublicChallenge() {
           {filteredChallenges.map(challenge => (
             <div key={challenge.id} className="bg-white shadow-md rounded-lg overflow-hidden">
               <div className="p-6">
-                <h2 className="text-xl font-bold mb-2 truncate">{challenge.title}</h2>
+                <h2 className="text-xl font-bold mb-2 truncate">{challenge.name}</h2>
                 
                 <div className="flex items-center mb-4">
                   <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full mr-2 ${
@@ -170,12 +187,12 @@ function PublicChallenge() {
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">
-                    Ends: {new Date(challenge.endDate).toLocaleDateString()}
+                    {challenge.endDate ? `Ends: ${new Date(challenge.endDate).toLocaleDateString()}` : ''}
                   </span>
                   
-                  <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm">
+                  <Link to={`/challenges/${challenge.id}`} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded text-sm">
                     View Details
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

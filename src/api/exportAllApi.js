@@ -36,7 +36,7 @@ export {
   createCategory,
   updateCategory,
   deleteCategory
-} from './cateory'; // Fixed typo here - using actual filename
+} from './category'; // Fixed typo here - using actual filename
 
 // Badge management
 export {
